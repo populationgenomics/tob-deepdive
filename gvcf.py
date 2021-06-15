@@ -37,7 +37,8 @@ lost_snps = snps.filter_rows(~ hl.is_defined(rb_gvcf.rows()[snps.row_key]))
 # instead we have to use the old locus and alleles in the join expression
 lost_snps = snps.filter_rows(~ hl.is_defined(rb_gvcf.rows()[snps.old_locus, snps.old_alleles]))
 
-# some exploratory coed to figure out whether a variant is a SNP
+# some exploratory code to figure out whether a variant is a SNP
+ht = snps
 allele_pairs = hl.range(1, hl.len(ht.alleles)).map(lambda i: (ht.alleles[0], ht.alleles[i]))
 hl.any(allele_pairs.map(lambda pair: hl.is_snp(pair[0], pair[1]))).show()
 
