@@ -31,8 +31,23 @@ snps = hl.filter_alleles(gvcf, lambda a,i:hl.is_snp(gvcf.alleles[0], a))
 snps.show()
 hl.summarize_variants(snps)
 
-snps = snps.annotate()
+# command below does not works because the alleles where changed by filter_alleles
 lost_snps = snps.filter_rows(~ hl.is_defined(rb_gvcf.rows()[snps.row_key]))
 
+# instead we have to use the old locus and alleles in the join expression
 lost_snps = snps.filter_rows(~ hl.is_defined(rb_gvcf.rows()[snps.old_locus, snps.old_alleles]))
+
+# some exploratory coed to figure out whether a variant is a SNP
+allele_pairs = hl.range(1, hl.len(ht.alleles)).map(lambda i: (ht.alleles[0], ht.alleles[i]))
+hl.any(allele_pairs.map(lambda pair: hl.is_snp(pair[0], pair[1]))).show()
+
+# this is not a satisfactory way to filter out homref blocks
+# a better way would be to filter out variants with only 2 alleles: ref and <NONREF>
+
+no_block = gvcf.filter_rows(hl.len(gvcf.alleles)>2)
+hl.summarize_variants(no_block)
+lost_variants = no_block.filter_rows(~ hl.is_defined(rb_gvcf.rows()[no_block.row_key]))
+hl.summarize_variants(lost_variants)
+# we lost 565,345 variants with ReblockGVCF. Why ? not all of these have GQ==0
+# ReblockGVCF: what criteria are used to remove variants ?
 
