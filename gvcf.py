@@ -52,3 +52,9 @@ hl.summarize_variants(lost_variants)
 # we lost 565,345 variants with ReblockGVCF. Why ? not all of these have GQ==0
 # ReblockGVCF: what criteria are used to remove variants ?
 
+tob = hl.read_matrix_table('gs://cpg-tob-wgs-test/mt/v2-raw.mt/')
+hl.summarize_variants(tob)
+# suprise ! this matrixTable is sparse but missing a lot of information for most samples (LA, LGT, LPL)
+# second surprise: some loci have a very large number of alleles (>100)
+bogus = tob.filter_rows(hl.len(tob.alleles)>100).cache()
+bogus.show()
